@@ -1,0 +1,69 @@
+image: Visual Studio 2017   # на этом VM-образе установлены все Visual Studio с 2008 по 2017
+
+init:
+    # секция инициализации, исполняется до клонирования проекта
+    # скорее всего, строчка ниже необязательна (так должно быть по умолчанию),
+    # вместе с тем, она присутствует в официальных примерах, так что пусть будет:
+    - git config --global core.autocrlf input
+
+clone_folder: C:\Users\Oracle\Documents\ # выбираем локальную директорию для клонирования
+shallow_clone: true              # копируем только последний коммит, без истории (git clone --depth 1)
+
+matrix:
+    fast_finish: false           # не останавливаемся после возникновения ошибки в каком-то из заданий
+
+platform:
+    # будем гонять CI на amd64 и x86...
+    - x64
+    - x86
+
+configuration:
+    # ... и в дебажной, и в релизной конфигурациях ...
+    - Debug
+    - Release
+
+environment:
+    matrix:
+        # ... на трёх студиях (2010, 2012, 2015)
+        - TOOLCHAIN: msvc10
+        - TOOLCHAIN: msvc12
+        - TOOLCHAIN: msvc14
+        - TOOLCHAIN: msvc15
+        APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+
+install:
+    # скрипт настройки среды и установки зависимостей:
+    - call set-env.bat %TOOLCHAIN% %PLATFORM%
+
+    - appveyor -FileName C:\Users\Oracle\Documents\GitHub\Rep4Appveyor\appveyor.yml
+    - 7z e -y <local-file> -o<local-dir>
+    - ...
+
+build_script:
+    # скрипт сборки проекта:
+    - mkdir build
+    - cd build
+    - cmake .. %CMAKE_CONFIGURE_FLAGS%
+    - cmake --build . %CMAKE_BUILD_FLAGS%
+
+test_script:
+    # скрипт тестирования проекта:
+    - ctest -C %CONFIGURATION% --output-on-failure
+
+#artifacts:
+    #- path: <local-package-path>
+    # name: package_name
+
+#deploy:
+    # выкладываем tagged-коммиты на GitHub Releases:
+   # description: '$(APPVEYOR_REPO_TAG_NAME)' # tag как имя релиза
+    #provider: GitHub
+
+    #auth_token:
+       # secure: <encrypted-github-token> # токен, зашифрованный на сайте appveyor.ci
+
+    #artifact: package_name # регулярное выражение, описывающее все артефакты данного релиза
+    #force_update: true # перезаписывать артефакты, если файл с таким именем уже имеется
+
+    #on:
+       # appveyor_repo_tag: true # выполнять deploy только для tagged-commit
