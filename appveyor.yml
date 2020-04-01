@@ -1,4 +1,4 @@
-image: Visual Studio 2017   # на этом VM-образе установлены все Visual Studio с 2008 по 2017
+APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017  # на этом VM-образе установлены все Visual Studio с 2008 по 2017
 
 init:
     # секция инициализации, исполняется до клонирования проекта
@@ -29,7 +29,6 @@ environment:
         - TOOLCHAIN: msvc12
         - TOOLCHAIN: msvc14
         - TOOLCHAIN: msvc15
-        APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
 
 install:
     # скрипт настройки среды и установки зависимостей:
